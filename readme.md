@@ -1,62 +1,77 @@
-# Study k6 ⚡
+# Study Cypress ⚡
 
-This repository contains a comprehensive reference guide for k6 — covering installation, writing and running scripts, options, HTTP requests, validation, the test lifecycle, scenarios, metrics, thresholds, and reporting, worked through hands-on against a REST API.
+This repository contains a comprehensive reference guide for Cypress — covering installation, project structure, writing tests, commands, assertions, running tests, and reporting, worked through hands-on against a Laravel demo app.
 
 ## Installation 🔧
 
-1. **Install k6**:
-
-    ```bash
-    # macOS (Homebrew)
-    brew install k6
-    ```
-
-   > **Windows**: `choco install k6`
-
-2. **Verify the Installation**:
+1. **Install Node.js** (v18+):
 
    ```bash
-   k6 --version
+   node -v
+   npm -v
    ```
 
-   > Reference: [grafana.com/docs/k6/latest/set-up/install-k6](https://grafana.com/docs/k6/latest/set-up/install-k6/)
+   > Download the **LTS** version from [nodejs.org](https://nodejs.org/)
+
+2. **Create the Project and Install Cypress**:
+
+   ```bash
+   mkdir my-e2e-project && cd my-e2e-project
+   npm init -y
+   npm install cypress --save-dev
+   ```
+
+3. **Verify the Installation** (auto-generates the folder structure on first run):
+
+   ```bash
+   npx cypress open
+   ```
+
+4. **Install the Mochawesome Reporter** (optional):
+
+   ```bash
+   npm install mochawesome mochawesome-merge mochawesome-report-generator --save
+   ```
+
+   > Reference: [docs.cypress.io/app/get-started/install-cypress](https://docs.cypress.io/app/get-started/install-cypress)
 
 ## List of Material 📚
 
-- ⚡ **[k6 Load Testing](001-k6-basics.md)**
+- ⚡ **[Cypress E2E Testing](001-cypress-basics.md)**
 
-  Script structure, options and stages, HTTP requests, checks, the test lifecycle, modular scripts, environment variables, scenarios and executors, custom metrics, thresholds, and output & reporting:
+  Project setup and demo app, project structure, writing tests with the AAA pattern, hooks, commands and selectors, assertions, running tests, and generating reports:
 
   ```javascript
-  import http from "k6/http";
-  import { check, sleep } from "k6";
-
-  export const options = {
-    vus: 10,
-    duration: "30s",
-  };
-
-  export default function () {
-    const response = http.get("http://localhost:3000/api/users");
-
-    check(response, {
-      "status is 200": (r) => r.status === 200,
-      "response time < 500ms": (r) => r.timings.duration < 500,
+  describe("User can login", () => {
+    beforeEach(() => {
+      cy.exec("cd ./demo-app && php artisan migrate:refresh --seed");
+      cy.visit("/");
     });
 
-    sleep(1);
-  }
+    it("user can login with valid credentials", () => {
+      // Arrange
+      cy.get("h4").should("have.text", "Login");
+
+      // Act
+      cy.get('[data-cy="email"]').type("admin@gmail.com");
+      cy.get('[data-cy="password"]').type("password");
+      cy.get('[data-cy="submit"]').click();
+
+      // Assert
+      cy.get(".nav-link > .d-sm-none").should("have.text", "Hi, Admin");
+    });
+  });
   ```
 
   Run the test:
 
   ```bash
-  k6 run --vus 50 --duration 1m script.js
+  npm run cy:run -- --reporter mochawesome
   ```
 
 ## 📍 References
 
-- [Udemy](https://www.udemy.com/course/belajar-k6/)
+- [Udemy](https://www.udemy.com/course/quality-assurance-engineer-cypress-dari-awal-sampai-mahir)
 
 ## 👨‍💻 Contributors
 
